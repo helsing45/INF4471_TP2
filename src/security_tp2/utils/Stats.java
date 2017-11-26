@@ -14,38 +14,40 @@ public class Stats {
     private long generatePuzzleTime;
     private long solvePuzzleTime;
     private long hackingTime;
+    private long generatePuzzleMemory;
+    private long solvePuzzleMemory;
+    private long hackingMemory;
     
     public Stats(int puzzleListLenght) {
         this.puzzleListLenght = puzzleListLenght;
-    }  
-    
-    public long getGeneratePuzzleTime() {
-        return generatePuzzleTime;
     }
     
-    public void setGeneratePuzzleTime(long generatePuzzleTime) {
-        this.generatePuzzleTime = generatePuzzleTime;
+    public void setPuzzleGenerationStats(long time, long memoryUsed){
+        this.generatePuzzleTime = time;
+        this.generatePuzzleMemory = memoryUsed;
     }
     
-    public long getSolvePuzzleTime() {
-        return solvePuzzleTime;
+    public void setSolvePuzzleStats(long time, long memoryUsed){
+        this.solvePuzzleTime = time;
+        this.solvePuzzleMemory = memoryUsed;
     }
     
-    public void setSolvePuzzleTime(long solvePuzzleTime) {
-        this.solvePuzzleTime = solvePuzzleTime;
+    public void setHackingStats(long time, long memoryUsed){
+        this.hackingTime = time;
+        this.hackingMemory = memoryUsed;
     }
     
-    public long getHackingTime() {
-        return hackingTime;
-    }
     
-    public void setHackingTime(long hackingTime) {
-        this.hackingTime = hackingTime;
-    }
 
     @Override
     public String toString() {
-        return "puzzleListLenght: " + puzzleListLenght+" generate Time: " + generatePuzzleTime + " solvingTime: "+ solvePuzzleTime +" hackingTime: " + hackingTime;
+        return puzzleListLenght +";"
+                + generatePuzzleTime + ";" 
+                + MemoryUtils.humanReadableByteCount(generatePuzzleMemory) +";"
+                + solvePuzzleTime +";"
+                + MemoryUtils.humanReadableByteCount(solvePuzzleMemory)+";"
+                + hackingTime+";"
+                + MemoryUtils.humanReadableByteCount(hackingMemory)+";";
     }
     
     

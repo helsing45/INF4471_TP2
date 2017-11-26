@@ -36,9 +36,13 @@ import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.SecretKeySpec;
+import security_tp2.protocol.AdvanceProtocol;
+import security_tp2.protocol.BaseProtocol;
+import security_tp2.protocol.Protocol;
 import security_tp2.utils.AES;
 import security_tp2.utils.Chrono;
 import security_tp2.utils.HexUtils;
+import security_tp2.utils.MemoryUtils;
 import security_tp2.utils.Stats;
 import security_tp2.utils.StringUtils;
 
@@ -52,88 +56,23 @@ public class Security_Tp2 {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-        for(int i=0; i <= 100; i++){
-            Stats stats = generateStats(10);
-            System.out.println(stats.toString());
-        }
-        /*for(int i=0; i <= 1000; i++){
-            Stats stats = generateStats(100);
-            System.out.println(stats.toString());
-        }
-        for(int i=0; i <= 1000; i++){
-            Stats stats = generateStats(1000);
-            System.out.println(stats.toString());
-        }*/
-    }
-    
-    protected static Stats generateStats(int puzzleLenght){
-        Stats stats = new Stats(puzzleLenght);
-        Chrono.start();
-        List<Pair<String,String>> puzzles = generatePuzzleList(puzzleLenght);
-        Runtime rt = Runtime.getRuntime();
-        long usedMB = (rt.totalMemory() - rt.freeMemory()) / 1024 / 1024;
-        System.out.println("UsedMD: "+usedMB);
-        stats.setGeneratePuzzleTime(Chrono.getTimeAndRestart());
-        Pair<Integer,String> solvedPuzzleResult = solvePuzzle(puzzles.get(getRandomIndex(puzzles.size())));
-        stats.setSolvePuzzleTime(Chrono.getTimeAndRestart());
-        Pair<Integer,String> hackPuzzleResult = solvePuzzle(solvedPuzzleResult.getKey(), puzzles);
-        stats.setHackingTime(Chrono.getTime());
-        return stats;
-    }
-    
-    protected static Pair<Integer,String> solvePuzzle(int index, List<Pair<String,String>> puzzles){
-        for(Pair<String,String> puzzle : puzzles){
-            Pair<Integer,String> puzzleResult = solvePuzzle(puzzle);
-            if(puzzleResult.getKey() == index){
-                return puzzleResult;
-            }
-        }
-        return null;
-    }
-    
-    protected static Pair<Integer,String> solvePuzzle(Pair<String,String> pair){
-        byte[] puzzleKey = generatePuzzleKey(pair.getKey(), 1000);
+        int iteration = 0;
+        long startTime = System.currentTimeMillis();
+        long timeLimit = 1000 * 60 * 60 * 5;
         
-        String solvedPuzzle = AES.decrypt(pair.getValue(), new String(puzzleKey));
-        int startIndex = solvedPuzzle.length() - 32;
-        return new Pair<>(Integer.valueOf(solvedPuzzle.substring(0,startIndex)),solvedPuzzle.substring(startIndex));
-    }
-    
-    protected static List<Pair<String,String>> generatePuzzleList(int iteration){
-        List<Pair<String,String>> lst = new ArrayList<>();
-        for(int i = 0; i<= iteration; i++){
-            String prePuzzleKey = generateRandomKey();
-            lst.add(new Pair<String,String>(prePuzzleKey,generatePuzzle(i, prePuzzleKey)));
+        System.out.println("Puzzle list length;puzzle generation time (mSec);memory usage (generation);Solving time (mSec);memory usage (solving);hacking time (mSec);memory usage (hacking)");
+        while(iteration <= 50 && ((System.currentTimeMillis() - startTime) < timeLimit)){
+            System.out.println(getProtocol().getStatsForProtocol(100));
+            System.out.println(getProtocol().getStatsForProtocol(1000));
+            System.out.println(getProtocol().getStatsForProtocol(10000));
+            System.out.println(getProtocol().getStatsForProtocol(100000));
+            System.out.println("iteration: " + iteration);
+            iteration ++;
         }
-        
-        Collections.shuffle(lst);
-        return lst;
     }
     
-    protected static String generatePuzzle(int puzzleIndex, String prePuzzleKey){
-        byte[] secretKey = generatePuzzleKey(prePuzzleKey, 1000);
-        String indexMessage = puzzleIndex + HexUtils.byteArrayToHexString(secretKey);
-        return AES.encrypt(indexMessage, new String(secretKey));
+    protected static Protocol getProtocol(){
+        return new AdvanceProtocol();
     }
-    
-    protected static byte[] generatePuzzleKey(String initialKey,int iteration){
-        byte[] key = StringUtils.getBytesFromString(initialKey);
-        for(int i=0; i <= iteration; i++){
-            key = StringUtils.getMD5(key);
-        }
-        return key;
-    }
-    
-    protected static String generateRandomKey(){
-        UUID uuid = UUID.randomUUID() ;
-        return uuid.toString();
-    }
-    
-    protected static int getRandomIndex(int max){
-        Random r = new Random();
-        int Low = 1;
-        return r.nextInt(max-Low) + Low;
-    }
-    
     
 }
